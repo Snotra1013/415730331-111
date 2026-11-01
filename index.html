@@ -1,0 +1,57 @@
+<!DOCTYPE html> <!-- 宣告此文件為 HTML5 格式 -->
+<html lang="zh-Hant"> <!-- 根元素，語言設為繁體中文 -->
+<head> <!-- 文件標頭區，放置設定資訊 -->
+  <meta charset="UTF-8"> <!-- 設定文字編碼為 UTF-8，避免中文亂碼 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- 讓網頁在手機上依裝置寬度顯示 -->
+  <title>心境體驗館</title> <!-- 瀏覽器分頁上顯示的標題 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"> <!-- 預先連線到字型服務，加快載入 -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> <!-- 預先連線到字型檔案伺服器 -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500&family=Noto+Serif+TC:wght@500;700&display=swap" rel="stylesheet"> <!-- 載入內文黑體與標題明體；沒網路時會退回系統字型 -->
+  <link rel="stylesheet" href="style.css"> <!-- 引入外部樣式表 -->
+</head> <!-- 標頭區結束 -->
+<body> <!-- 文件主體，放置畫面內容 -->
+
+  <div id="stage" data-theme="day"> <!-- 全螢幕畫布，data-theme 控制日間或夜間配色 -->
+
+    <div id="menu" class="screen"> <!-- 主選單畫面 -->
+      <div class="menu-inner"> <!-- 選單內容外框，限制寬度並靠左對齊 -->
+        <h1>心境體驗館</h1> <!-- 網站主標題 -->
+        <p class="sub">選擇一個主題，走進當事人日常裡的幾個瞬間。</p> <!-- 副標題說明 -->
+        <div class="buttons"> <!-- 放主題選項的清單容器 -->
+          <button class="disease-btn" data-id="depression"> <!-- 憂鬱症選項，data-id 供 JS 辨識 -->
+            <span class="d-name">憂鬱症</span> <!-- 疾病名稱 -->
+            <span class="d-meta">3 個關卡</span> <!-- 關卡數量說明 -->
+          </button> <!-- 憂鬱症選項結束 -->
+          <button class="disease-btn" data-id="autism"> <!-- 自閉症選項，data-id 供 JS 辨識 -->
+            <span class="d-name">自閉症</span> <!-- 疾病名稱 -->
+            <span class="d-meta">3 個關卡</span> <!-- 關卡數量說明 -->
+          </button> <!-- 自閉症選項結束 -->
+        </div> <!-- 選項清單結束 -->
+        <p class="warn">內容會模擬情緒困擾的感受。覺得不舒服時，隨時可以按「返回選單」離開。</p> <!-- 體驗前的溫馨提醒 -->
+      </div> <!-- 選單內容外框結束 -->
+    </div> <!-- 主選單結束 -->
+
+    <div id="game" class="screen hidden"> <!-- 遊戲畫面，一開始先隱藏 -->
+      <div id="hud"> <!-- 上方資訊列，底色不透明，確保文字永遠看得清楚 -->
+        <div class="hud-left"> <!-- 資訊列左側區塊 -->
+          <div id="hud-title"></div> <!-- 顯示關卡序號與標題 -->
+          <div id="hud-hint"></div> <!-- 顯示本關的操作提示 -->
+        </div> <!-- 左側區塊結束 -->
+        <button id="btn-back" class="btn ghost">返回選單</button> <!-- 返回主選單按鈕 -->
+      </div> <!-- 資訊列結束 -->
+      <div id="level-area"></div> <!-- 關卡內容會由 JS 動態放進這裡 -->
+    </div> <!-- 遊戲畫面結束 -->
+
+    <div id="modal" class="hidden"> <!-- 彈出小視窗的遮罩層，預設隱藏 -->
+      <div class="modal-box"> <!-- 小視窗本體 -->
+        <h2 id="modal-title"></h2> <!-- 小視窗標題 -->
+        <div id="modal-body"></div> <!-- 小視窗內文 -->
+        <div id="modal-actions" class="modal-actions"></div> <!-- 小視窗按鈕區 -->
+      </div> <!-- 小視窗本體結束 -->
+    </div> <!-- 遮罩層結束 -->
+
+  </div> <!-- 全螢幕畫布結束 -->
+
+  <script src="sketch.js"></script><!-- 引入遊戲邏輯，放在最後確保元素已存在 -->
+</body> <!-- 主體結束 -->
+</html> <!-- 文件結束 -->
