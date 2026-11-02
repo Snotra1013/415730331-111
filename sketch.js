@@ -1182,10 +1182,11 @@ function autismLevel2(area, done) { // 自閉症第二關主函式
   const w = area.clientWidth; // 畫布寬
   const h = area.clientHeight; // 畫布高
   const N = 3; // 拼圖是 N x N 片
-  const B = Math.min(340, h * 0.38, w * 0.8); // 拼圖整體的邊長
+  const small = w < 700; // 是否為手機等窄螢幕
+  const B = small ? Math.min(w * 0.56, h * 0.28, 280) : Math.min(340, h * 0.38, w * 0.8); // 拼圖整體的邊長（手機縮小，留空間給想法與散落的拼圖片）
   const ps = B / N; // 每一片的邊長
   const bl = (w - B) / 2; // 拼圖板左邊位置
-  const bt = Math.max(100, h * 0.17); // 拼圖板上方位置
+  const bt = small ? 92 : Math.max(100, h * 0.17); // 拼圖板上方位置（手機貼近上方）
 
   const cvs = document.createElement('canvas'); // 用畫布畫出一幅風景圖
   cvs.width = 600; // 圖寬
@@ -1273,11 +1274,17 @@ function autismLevel2(area, done) { // 自閉症第二關主函式
   meWrap.appendChild(el('div', 'a2-dot a2-dot1')); // 連到「我」的大圓點
   meWrap.appendChild(el('div', 'a2-dot a2-dot2')); // 連到「我」的小圓點
   meWrap.appendChild(el('div', 'a2-avatar', '我')); // 代表「我」的圓圈
-  const tw = Math.min(300, w * 0.3); // 想法區寬度
-  const th = 190; // 想法區高度（預估）
+  let tw = Math.min(300, w * 0.3); // 想法區寬度
+  let th = 190; // 想法區高度（預估）
   let tx = bl + B + 28; // 想法區左邊位置：拼圖板右側，就在視線旁邊
   let ty = bt; // 想法區上方位置：和拼圖板上緣對齊
-  if (tx + tw > w - 12) { // 右邊放不下（窄螢幕）
+  if (small) { // 手機：想法區改成拼圖板正下方的一條橫幅，左邊是「我」，右邊是想法
+    tw = w - 24; // 幾乎佔滿寬度，文字才不會被擠成直排
+    th = 84; // 橫幅高度（預估）
+    tx = 12; // 靠左留白
+    ty = bt + B + 10; // 緊貼拼圖板下方
+    meWrap.classList.add('wide'); // 套用橫向排版
+  } else if (tx + tw > w - 12) { // 右邊放不下（窄螢幕）
     tx = Math.max(12, (w - tw) / 2); // 改成水平置中
     ty = bt + B + 16; // 放在拼圖板正下方
   } // 判斷結束
@@ -1323,7 +1330,8 @@ function autismLevel2(area, done) { // 自閉症第二關主函式
   function scatter(i) { // 幫第 i 片找一個擺放的位置（散落在拼圖板周圍）
     for (let tries = 0; tries < 80; tries++) { // 最多試 80 次
       const x = rand(16, Math.max(17, w - ps - 16)); // 隨機 X
-      const y = rand(100, Math.max(101, h - ps - 24)); // 隨機 Y（避開上方資訊列）
+      const y0 = small ? ty + th + 8 + 56 : 100; // 可擺放的最上緣（手機：想法橫幅下方再留一條 56px 的帶狀區，給別人的話出現）
+      const y = rand(y0, Math.max(y0 + 1, h - ps - 24)); // 隨機 Y（避開上方資訊列）
       const hitBoard = x + ps > bl - 12 && x < bl + B + 12 && y + ps > bt - 12 && y < bt + B + 12; // 是否壓到拼圖板
       const hitThought = x + ps > tx - 12 && x < tx + tw + 12 && y + ps > ty - 12 && y < ty + th + 12; // 是否壓到想法區
       if (hitBoard || hitThought) continue; // 壓到就重抽
@@ -1411,10 +1419,29 @@ function autismLevel2(area, done) { // 自閉症第二關主函式
       const rad = useFocus ? rand(110, 230) : B / 2 + rand(70, 190); // 離中心的距離
       let x = ax + Math.cos(ang) * rad - 90; // 對話泡泡的 X
       let y = ay + Math.sin(ang) * rad * 0.7 - 20; // 對話泡泡的 Y
+      if (small && tries < 12) { // 手機：先試著放在想法橫幅下方的專屬帶狀區，這裡不會被拼圖片蓋住
+        x = rand(10, Math.max(11, w - 230)); // 隨機 X
+        y = ty + th + 8 + rand(0, 10); // 帶狀區內的 Y
+      } else if (tries >= 15) { // 靠近焦點的位置都被佔住時（手機空間小），改成在整個畫面隨機找空位
+        x = rand(10, Math.max(11, w - 230)); // 隨機 X
+        y = rand(90, Math.max(91, h - 70)); // 隨機 Y
+      } // 判斷結束
       x = Math.min(w - 230, Math.max(10, x)); // 限制在畫面內
       y = Math.min(h - 70, Math.max(90, y)); // 限制在畫面內，且不蓋住資訊列
       if (overlap(x, y, 220, 44, bl, bt, B, B, 10)) continue; // 不遮住拼圖板
       if (overlap(x, y, 220, 44, tx, ty, tw, th, 10)) continue; // 不遮住「我」的想法區
+      if (tries < 45) { // 前面幾次先避開其他已出現的話
+        let hitB = false; // 是否壓到其他泡泡
+        others.forEach(function (o) { if (overlap(x, y, 220, 44, o.offsetLeft, o.offsetTop, o.offsetWidth, o.offsetHeight, 4)) hitB = true; }); // 逐一檢查
+        if (hitB) continue; // 重抽
+      } // 判斷結束
+      if (tries < 45) { // 前面幾次先盡量避開還沒拼好的拼圖片（手機空間小，否則話會被拼圖蓋住）
+        let hitPiece = false; // 是否壓到拼圖片
+        area.querySelectorAll('.a2-piece:not(.placed)').forEach(function (pc) { // 逐一檢查
+          if (overlap(x, y, 220, 44, pc.offsetLeft, pc.offsetTop, ps, ps, 0)) hitPiece = true; // 有重疊
+        }); // 檢查結束
+        if (hitPiece) continue; // 重抽
+      } // 判斷結束
       const b = el('div', 'a2-other', A2_OTHERS[Math.floor(Math.random() * A2_OTHERS.length)]); // 對話泡泡
       b.style.left = x + 'px'; // 設定位置
       b.style.top = y + 'px'; // 設定位置
@@ -1467,26 +1494,39 @@ function autismLevel3(area, done) { // 自閉症第三關主函式
   me.style.top = (my - 28) + 'px'; // 設定位置
   area.appendChild(me); // 放進畫布
 
-  const INVITES = ['一起來玩！', '來啦來啦', '大家都在等你', '你怎麼不加入？', '很好玩的啦', '一起嘛～', '過來這邊！', '換你了！']; // 邀請的話
+  const INVITES = ['一起來玩！', '來啦來啦', '一起踢球吧', '很好玩的啦', '一起嘛～', '過來這邊！', '換你踢球了！']; // 邀請的話
   const invites = []; // 目前出現的邀請
   let arrived = false; // 是否已走到安靜角落
 
-  function spawnInvite() { // 冒出一句邀請
-    if (arrived || invites.length >= 22) return; // 已抵達或數量已滿就不再出現
-    for (let tries = 0; tries < 40; tries++) { // 最多試 40 次找適合的位置
-      const x = rand(10, w - 230); // 隨機 X（預留右側空間避免被切到）
-      const y = rand(90, h - 100); // 隨機 Y（預留下方空間避免被切到）
-      const dx = x + 70 - cx; // 與角落中心的 X 距離
-      const dy = y + 16 - cy; // 與角落中心的 Y 距離
+  function spawnInvite() { // 冒出一句邀請（位置不會和其他邀請、團體遊戲、安靜角落重疊）
+    if (arrived || invites.length >= 25) return; // 已抵達或數量已滿就不再出現
+    const b = el('div', 'a3-invite', INVITES[Math.floor(Math.random() * INVITES.length)]); // 邀請泡泡
+    b.style.fontSize = rand(16, 28) + 'px'; // 隨機字級，聲音忽大忽小
+    b.style.visibility = 'hidden'; // 先隱藏，量好大小、找到位置後才顯示
+    area.appendChild(b); // 先放進畫布才能量到實際大小
+    const bw = b.offsetWidth; // 泡泡實際寬度
+    const bh = b.offsetHeight; // 泡泡實際高度
+    for (let tries = 0; tries < 60; tries++) { // 最多試 60 次找空位
+      const x = rand(10, Math.max(11, w - bw - 10)); // 隨機 X（依實際寬度，不會被切到）
+      const y = rand(90, Math.max(91, h - bh - 24)); // 隨機 Y（依實際高度，不會被切到）
+      const dx = x + bw / 2 - cx; // 與角落中心的 X 距離
+      const dy = y + bh / 2 - cy; // 與角落中心的 Y 距離
       if (Math.sqrt(dx * dx + dy * dy) < 170) continue; // 角落附近保持乾淨
-      const b = el('div', 'a3-invite', INVITES[Math.floor(Math.random() * INVITES.length)]); // 邀請泡泡
+      const gdx = x + bw / 2 - gx; // 與團體遊戲中心的 X 距離
+      const gdy = y + bh / 2 - gy; // 與團體遊戲中心的 Y 距離
+      if (Math.sqrt(gdx * gdx + gdy * gdy) < 150 + bw / 2) continue; // 不蓋住團體遊戲的圓點與文字
+      let hit = false; // 是否壓到其他邀請
+      invites.forEach(function (o) { // 逐一檢查已出現的邀請
+        if (x < o.offsetLeft + o.offsetWidth + 8 && x + bw + 8 > o.offsetLeft && y < o.offsetTop + o.offsetHeight + 8 && y + bh + 8 > o.offsetTop) hit = true; // 兩個方塊重疊（含 8px 間距）
+      }); // 檢查結束
+      if (hit) continue; // 壓到就重抽
       b.style.left = x + 'px'; // 設定位置
       b.style.top = y + 'px'; // 設定位置
-      b.style.fontSize = rand(16, 28) + 'px'; // 隨機字級，聲音忽大忽小
-      area.appendChild(b); // 放進畫布
+      b.style.visibility = 'visible'; // 顯示
       invites.push(b); // 記錄元素
       return; // 完成一次，結束
     } // 迴圈結束
+    b.remove(); // 找不到空位就放棄這一句
   } // spawnInvite 結束
 
   let dragging = false; // 是否拖曳中
