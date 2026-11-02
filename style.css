@@ -464,8 +464,14 @@ h1 { /* 主標題 */
 
 /* ===== 手機與減少動態 ===== */
 @media (max-width: 600px) { /* 窄螢幕時 */
-  #hud { padding: 10px 16px; } /* 縮小資訊列內距 */
-  .problem { font-size: 28px; padding: 14px 18px; } /* 縮小題目 */
+  #hud { padding: 8px 12px; gap: 10px; } /* 縮小資訊列內距，讓資訊列維持在約 72px 高，不會蓋住關卡內容 */
+  #hud-title { font-size: 17px; line-height: 1.3; } /* 縮小標題 */
+  #hud-hint { font-size: 12px; line-height: 1.35; } /* 縮小提示文字 */
+  #btn-back { padding: 6px 10px; font-size: 13px; white-space: nowrap; flex-shrink: 0; } /* 返回按鈕不換行、不被壓縮 */
+  .problem { font-size: 22px; padding: 10px 12px; gap: 8px; white-space: nowrap; } /* 縮小題目，算式不換行 */
+  .slot { width: 56px; height: 48px; } /* 縮小答案空格 */
+  .tile { width: 56px; height: 50px; font-size: 24px; } /* 縮小答案方塊 */
+  .l1-board { top: 88px; gap: 12px; } /* 題目區貼近資訊列下方 */
   .l3-clock { font-size: 56px; } /* 縮小時鐘 */
   .d-name { font-size: 24px; } /* 縮小疾病名稱 */
 }
@@ -815,4 +821,15 @@ h1 { /* 主標題 */
 }
 
 @media (max-width: 700px) { /* 窄螢幕時 */
+}
+
+/* ===== 手機版補充（放在檔案最後，確保覆蓋前面的基本樣式） ===== */
+@media (max-width: 600px) { /* 窄螢幕時 */
+  .tray { gap: 10px; bottom: 4%; } /* 答案列貼近底部，與題目區保持距離 */
+  .a2-thought { font-size: 18px; padding: 8px 14px; } /* 第二關想法字級（手機） */
+  .a2-other { font-size: 14px; max-width: 200px; } /* 第二關別人的話（手機） */
+  .a2-me.wide { flex-direction: row-reverse; justify-content: center; } /* 想法橫幅：「我」在左、想法在右 */
+  .a2-me.wide .a2-thought { flex: 1; } /* 想法泡泡佔滿剩餘寬度 */
+  .a2-me.wide .a2-dot { margin: 0 0 0 4px; flex-shrink: 0; } /* 圓點改成橫向間距 */
+  .a2-me.wide .a2-avatar { margin: 0 0 0 4px; flex-shrink: 0; } /* 「我」的圓圈橫向間距 */
 }
